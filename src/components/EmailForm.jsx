@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import Confetti from 'react-confetti';
+import React, { useState, lazy, Suspense } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './EmailForm.module.css';
 
+const Confetti = lazy(() => import('react-confetti'));
+
 export default function EmailForm() {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [honeypot, setHoneypot] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
@@ -15,7 +16,7 @@ export default function EmailForm() {
     e.preventDefault();
     setStatus('loading');
     setErrorMsg('');
-    setShowConfetti(false); // reset
+    setShowConfetti(false);
 
     try {
       const res = await fetch('/.netlify/functions/submit', {
@@ -42,7 +43,11 @@ export default function EmailForm() {
   return (
     <>
       <ToastContainer />
-      {showConfetti && <Confetti />}
+      {showConfetti && (
+        <Suspense fallback={null}>
+          <Confetti />
+        </Suspense>
+      )}
 
       {status === 'success' ? (
         <p className={styles.thanks}>Thank you for subscribing!</p>
