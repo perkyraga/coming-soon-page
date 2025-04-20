@@ -67,9 +67,12 @@
   }
   .socials a {
     font-size: 1.5rem;
-    transition: transform 0.2s;
+    color: var(--icon-color);
+    transition: color 0.3s, transform 0.2s;
   }
+  
   .socials a:hover {
     transform: scale(1.1);
+    color: var(--icon-color-hover);
   }
   
