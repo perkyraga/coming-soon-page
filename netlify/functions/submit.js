@@ -1,6 +1,8 @@
 const { GoogleAuth } = require('google-auth-library');
 const { google } = require('googleapis');
+const twilio = require('twilio');
 
+// Google Sheets setup
 const SERVICE_ACCOUNT = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT || '{}');
 const SHEET_ID = process.env.SHEET_ID;
 
@@ -18,6 +20,7 @@ exports.handler = async (event) => {
     console.log('📋 SHEET_ID:', SHEET_ID);
     console.log('👤 Service email:', SERVICE_ACCOUNT?.client_email);
 
+    // 1. Append to Google Sheets
     const client = await auth.getClient();
     const sheets = google.sheets({ version: 'v4', auth: client });
 
@@ -31,6 +34,20 @@ exports.handler = async (event) => {
     });
 
     console.log('✅ Appended to sheet:', response.data.updates?.updatedRange);
+
+    // 2. Send Twilio notification (SMS or WhatsApp)
+    const twilioClient = twilio(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+
+    const msg = await twilioClient.messages.create({
+      from: process.env.TWILIO_PHONE_FROM, // e.g., whatsapp:+14155238886
+      to: process.env.TWILIO_PHONE_TO,     // e.g., whatsapp:+9198xxxxxxxx
+      body: `📬 New email signup: ${email}`,
+    });
+
+    console.log('📱 Notification sent via Twilio, SID:', msg.sid);
 
     return {
       statusCode: 200,
